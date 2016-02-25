@@ -4,14 +4,16 @@ using System;
 
 namespace TodoListWebApp.Utils
 {
+    using Microsoft.AspNet.Http.Features;
+
     public class NaiveSessionCache : TokenCache
     {
         private static readonly object FileLock = new object();
         string UserObjectId = string.Empty;
         string CacheId = string.Empty;
-        ISessionCollection Session = null;
+        ISession Session = null;
 
-        public NaiveSessionCache(string userId, ISessionCollection session)
+        public NaiveSessionCache(string userId, ISession session)
         {
             UserObjectId = userId;
             CacheId = UserObjectId + "_TokenCache";
@@ -25,7 +27,7 @@ namespace TodoListWebApp.Utils
         {
             lock (FileLock)
             {   
-                this.Deserialize((byte[])Session[CacheId]);
+                this.Deserialize(Session.Get(CacheId));
             }
         }
 
@@ -34,7 +36,7 @@ namespace TodoListWebApp.Utils
             lock (FileLock)
             {
                 // reflect changes in the persistent store
-                Session[CacheId] = this.Serialize();
+                Session.Set(CacheId, this.Serialize());
                 // once the write operation took place, restore the HasStateChanged bit to false
                 this.HasStateChanged = false;
             }

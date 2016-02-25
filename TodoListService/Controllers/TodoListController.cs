@@ -8,6 +8,8 @@ using System.Collections.Concurrent;
 
 namespace TodoListService.Controllers
 {
+    using Microsoft.AspNet.Authorization;
+
     [Authorize]
     [Route("api/[controller]")]
     public class TodoListController : Controller
@@ -19,7 +21,7 @@ namespace TodoListService.Controllers
         public IEnumerable<TodoItem> Get()
         {
             // Please note: use of "Context.User", instead of the standard ClaimsPrincipal.Current, is due to a bug in this release
-            string owner = Context.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            string owner = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             return todoStore.Where(t => t.Owner == owner).ToList();
         }
     
@@ -28,7 +30,7 @@ namespace TodoListService.Controllers
         public void Post(string Title)
         {
             // Please note: use of "Context.User", instead of the standard ClaimsPrincipal.Current, is due to a bug in this release
-            string owner = Context.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            string owner = this.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             todoStore.Add(new TodoItem { Owner = owner, Title = Title });
         }
     }

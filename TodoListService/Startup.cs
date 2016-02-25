@@ -1,50 +1,43 @@
-﻿using System;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Hosting;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Routing;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.ConfigurationModel;
-using Microsoft.AspNet.Security.OAuthBearer;
-using Microsoft.AspNet.Security;
-using System.IdentityModel.Tokens;
-using System.Collections.Generic;
-using System.Security.Claims;
-
-namespace TodoListService
+﻿namespace TodoListService
 {
+    using Microsoft.AspNet.Builder;
+    using Microsoft.AspNet.Hosting;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+
     public partial class Startup
     {
         public Startup(IHostingEnvironment env)
         {
             // Setup configuration sources.
-            Configuration = new Configuration()
-                .AddJsonFile("config.json");
+            this.Configuration = (new ConfigurationBuilder().AddJsonFile("config.json")).Build();
         }
 
         public IConfiguration Configuration { get; set; }
+
+        // Configure is called after ConfigureServices is called.
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            this.ConfigureAuth(app);
+
+            app.UseStaticFiles();
+
+            // Add MVC to the request pipeline.
+            app.UseMvc(
+                routes =>
+                    {
+                        routes.MapRoute(
+                            name: "default",
+                            template: "{controller}/{action}/{id?}",
+                            defaults: new { controller = "Home", action = "Index" });
+                    });
+        }
 
         // This method gets called by a runtime.
         // Use this method to add services to the container
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-        }
-
-        // Configure is called after ConfigureServices is called.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-        {
-            ConfigureAuth(app);
-
-            app.UseStaticFiles();
-            // Add MVC to the request pipeline.
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action}/{id?}",
-                    defaults: new { controller = "Home", action = "Index" });
-            });
         }
     }
 }

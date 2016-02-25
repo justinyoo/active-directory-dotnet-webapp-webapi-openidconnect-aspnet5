@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.Builder;
+﻿using Microsoft.AspNet.Http.Abstractions;
+using Microsoft.AspNet.Builder;
 using System;
 
 namespace TodoListService
@@ -10,8 +11,8 @@ namespace TodoListService
             // Configure the app to use OAuth Bearer Authentication
             app.UseOAuthBearerAuthentication(options =>
             {
-                options.Audience = Configuration.Get("AzureAd:Audience");
-                options.Authority = String.Format(Configuration.Get("AzureAd:AadInstance"), Configuration.Get("AzureAd:Tenant"));
+                options.Audience = Configuration.GetSection("AzureAd:Audience").Value;
+                options.Authority = String.Format(Configuration.GetSection("AzureAd:AadInstance").Value, Configuration.GetSection("AzureAd:Tenant").Value);
             });
         }
     }
